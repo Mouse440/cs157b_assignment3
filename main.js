@@ -16,6 +16,8 @@ function PatternMatch(pattern) {
 
 	this.pattern = pattern;	 //pattern to match
 	this._lastLineData = ''; //last line data store
+	this.result = [];												//result store
+	this.done = false;
 
 	//Switching on object mode so when stream reads sensordata it emits single pattern match.
  	Transform.call(
@@ -40,15 +42,16 @@ PatternMatch.prototype._transform = function (chunk, encoding, getNextChunk){
     this._lastLineData = lines.splice(lines.length-1,1)[0]; // grab the last element of array and get the value
  	
  	lines.forEach( this.push.bind(this) );
+ 	this.done = false;	//set done to false;
 
     getNextChunk();
 }
-//After stream has been read and transformed, the _flush method is called. It is a great
-//place to push values to output stream and clean up existing data
+//flushing data at the end of stream
 PatternMatch.prototype._flush = function (flushCompleted)	{
 	if(this._lastLineData) {
 		this.push(this._lastLineData); //push the last line data to the result
 	}
+	this.done = true;							//set done to true
 	this._lastLineData = false;				  //clean the variable
 	flushCompleted();
 }
@@ -61,16 +64,17 @@ if (program.pattern) { //a pattern is present
 	var inputStream = fs.createReadStream( "input-sensor.txt" );	//create a stream of input-sensor.txt file
 	var patternMatch = new PatternMatch(patt);
 	var patternStream = inputStream.pipe( patternMatch );
-	var result = [];												//result store
 
 	patternMatch.on('readable', function () {	//read the input
 	    var line;
 	    while (null !== (line = this.read())) {
-	        result.push(line.trim());				//push line into result store
+	        this.result.push(line.trim());				//push line into result store
 	    }
-	    console.log(result);						//show result
+
+	    if(this.done) {
+			console.log(this.result);						//show result
+	    }
 	});
-	
 } else {
 	console.log('You have not entered any pattern');
 }
