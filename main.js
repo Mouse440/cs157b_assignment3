@@ -49,9 +49,9 @@ PatternMatch.prototype._transform = function (chunk, encoding, getNextChunk){
 //flushing data at the end of stream
 PatternMatch.prototype._flush = function (flushCompleted)	{
 	if(this._lastLineData) {
-		this.push(this._lastLineData); //push the last line data to the result
+		this.push(this._lastLineData); 		  //push the last line data to the result
 	}
-	this.done = true;							//set done to true
+	this.done = true;						  //set done to true
 	this._lastLineData = false;				  //clean the variable
 	flushCompleted();
 }
@@ -59,7 +59,7 @@ PatternMatch.prototype._flush = function (flushCompleted)	{
 //parse input argument
 program.option('-p, --pattern <pattern>', 'Input Pattern such as . ,').parse(process.argv);
 
-if (program.pattern) { //a pattern is present
+if (program.pattern) { 						   //a pattern is present
 	var patt = program.pattern;
 	var inputStream = fs.createReadStream( "input-sensor.txt" );	//create a stream of input-sensor.txt file
 	var patternMatch = new PatternMatch(patt);
@@ -68,13 +68,13 @@ if (program.pattern) { //a pattern is present
 	patternMatch.on('readable', function () {	//read the input
 	    var line;
 	    while (null !== (line = this.read())) {
-	        this.result.push(line.trim());				//push line into result store
+	        this.result.push(line.trim());	    //push line into result store
 	    }
 
 	    if(this.done) {
-			console.log(this.result);						//show result
+			console.log(this.result);		    //show result
 	    }
 	});
 } else {
-	console.log('You have not entered any pattern');
+	console.log('You have not entered any pattern. Try again with -p, --pattern <pattern>');
 }
